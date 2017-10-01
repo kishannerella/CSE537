@@ -244,6 +244,39 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
       Your expectimax agent (question 4)
     """
 
+    def getExpectiMinimaxAction(self,gameState,turn,depth):       
+        if (depth == self.depth):
+            return (self.evaluationFunction(gameState),None)		
+        Actions = gameState.getLegalActions(turn)
+        #print len(Actions),turn	,depth	
+        if turn == 0:
+            score = -9999999999
+            minimaxAction = "pacRight"			 
+        else:
+            score = 0
+            minimaxAction = "gRight" 			
+        			
+        currdepth = depth
+          		
+        if ( turn == (gameState.getNumAgents()-1) ):		
+            currdepth = depth + 1		
+
+        if(len(Actions) == 0):
+            return (self.evaluationFunction(gameState),"None")  		
+                    		 
+        for action in Actions: 		
+            successorState              = gameState.generateSuccessor(turn,action)			 
+            (currentScore,Nextaction)   = self.getExpectiMinimaxAction(successorState,((turn+ 1)% (gameState.getNumAgents())),currdepth) 			
+            if (turn == 0) and (currentScore > score):
+                score = currentScore
+                minimaxAction = action
+            if (turn != 0) and (currentScore != 0):
+                score = score + float(currentScore)/float(len(Actions))
+                minimaxAction = action 
+ 				
+        return (score,minimaxAction)
+	
+	
     def getAction(self, gameState):
         """
           Returns the expectimax action using self.depth and self.evaluationFunction
@@ -251,6 +284,9 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
           All ghosts should be modeled as choosing uniformly at random from their
           legal moves.
         """
+        (score,action) = self.getExpectiMinimaxAction(gameState,0,0)
+        return action 
+		
         "*** YOUR CODE HERE ***"
         util.raiseNotDefined()
 
