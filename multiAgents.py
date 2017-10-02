@@ -48,7 +48,7 @@ class ReflexAgent(Agent):
         chosenIndex = random.choice(bestIndices) # Pick randomly among the best
 
         "Add more of your code here if you want to"
-
+        #print "chosenIndex = " + chosenIndex
         return legalMoves[chosenIndex]
 
     def evaluationFunction(self, currentGameState, action):
@@ -74,14 +74,69 @@ class ReflexAgent(Agent):
         newGhostStates = successorGameState.getGhostStates()
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
         mindist = 99999
-        #print newScaredTimes		
-        GhostDist = finddist(newGhostStates,newPos)	
+        GhostDist = finddist(newGhostStates,newPos)
         #index = min(xrange(len(GhostDist)), key=GhostDist.__getitem__)
-        #scared_ghost = GhostDist + newScaredTimes 		
+        #scared_ghost = GhostDist + newScaredTimes
+
+        minFoodDist = 99999
+        foodList = newFood.asList(True)
+        #print foodList
+        for x in foodList:
+            curDist = util.manhattanDistance(x, newPos)
+            if curDist < minFoodDist:
+                minFoodDist = curDist
+
+        #print minFoodDist
         index = min(xrange(len(GhostDist)), key=GhostDist.__getitem__)
-        if foodCount != 0: 		
-            return GhostDist[index] + 1/foodCount
-        return GhostDist[index] 			
+
+        """
+        If the foodCount is zero for the next successor state we should
+        go there if there is no ghost near.
+        """
+        if foodCount == 0 and GhostDist[index] > 1:
+            return 1000
+
+        """
+        If the ghost is near, return a low value
+        """
+        if GhostDist[index] <= 2:
+            ans = GhostDist[index]
+        else:
+            """
+            If the action is STOP, return a very low value
+            """
+            if currentGameState.getPacmanPosition() == newPos:
+                return 0
+            """
+            If this successor state has a food, return a good
+            value. I'm choosing 4+2 because this can be the highest
+            value one can get after this stage.
+            """
+            if (currentGameState.getNumFood() > foodCount):
+                ans = 4 + 2
+                return ans
+            """
+            Give a slight advantage to a action where the ghost is away
+            """
+            ans = 4 + GhostDist[index]/1000
+
+        """
+        We would enter this case only when the ghost is near and the
+        successor has food. In that case let's give a slight advantage
+        based on foodCount.
+        """
+        if (currentGameState.getNumFood() > foodCount) and foodCount > 0:
+            ans = ans + 1.0/foodCount
+
+        """
+        Give an advantage based on nearest food available to the successor state.
+        """
+        if (foodCount == 0):
+            ans = ans + 0.5
+        else:
+            ans = ans + 1.0/minFoodDist
+
+        return ans
 	
         "*** YOUR CODE HERE ***"
         #return successorGameState.getScore()
