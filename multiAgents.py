@@ -73,20 +73,16 @@ class ReflexAgent(Agent):
         foodCount = successorGameState.getNumFood()		
         newGhostStates = successorGameState.getGhostStates()
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
-        mindist = 99999
         GhostDist = finddist(newGhostStates,newPos)
-        #index = min(xrange(len(GhostDist)), key=GhostDist.__getitem__)
-        #scared_ghost = GhostDist + newScaredTimes
 
         minFoodDist = 99999
         foodList = newFood.asList(True)
-        #print foodList
+
         for x in foodList:
             curDist = util.manhattanDistance(x, newPos)
             if curDist < minFoodDist:
                 minFoodDist = curDist
 
-        #print minFoodDist
         index = min(xrange(len(GhostDist)), key=GhostDist.__getitem__)
 
         """
@@ -137,9 +133,6 @@ class ReflexAgent(Agent):
             ans = ans + 1.0/minFoodDist
 
         return ans
-	
-        "*** YOUR CODE HERE ***"
-        #return successorGameState.getScore()
 
 
 def finddist(GhostStates, src):
@@ -187,7 +180,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
     def getMinimaxAction(self,gameState,turn,depth):     
 
         """ 
-           This fucntion implements the minimax algorithms
+           This function implements the minimax algorithms
            turn = 0 :  Packman
            turn > 0 :  ghost
            This function generates the successorState for an agent and finds
@@ -263,7 +256,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     def getalphaBetaAction(self,gameState,turn,depth,alpha,beta):
 	
         """ 
-           This fucntion implements the alpha beta pruning 
+           This function implements the alpha beta pruning
            turn = 0 :  Packman
            turn > 0 :  ghost
            This function generates the successorState for an agent and finds
@@ -332,7 +325,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
     def getExpectiMinimaxAction(self,gameState,turn,depth):     
 
         """ 
-           This fucntion implements the Expectiminimax
+           This function implements the Expectiminimax
            turn = 0 :  Packman
            turn > 0 :  ghost
            This function generates the successorState for an agent and finds
