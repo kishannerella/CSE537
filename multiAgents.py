@@ -261,7 +261,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
            turn > 0 :  ghost
            This function generates the successorState for an agent and finds
            the minimum value (for ghost) and maximum value(for packman)
-            stops expanding further nodes once beta > alpha 		   
+            stops expanding further nodes once beta < alpha 		   
         """		
         """
         If the maximum depth is reached returns the evaluation function 
@@ -322,7 +322,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
       Your expectimax agent (question 4)
     """
 
-    def getExpectiMinimaxAction(self,gameState,turn,depth):     
+    def getExpectimaxAction(self,gameState,turn,depth):     
 
         """ 
            This function implements the Expectiminimax
@@ -377,7 +377,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
           All ghosts should be modeled as choosing uniformly at random from their
           legal moves.
         """
-        (score,action) = self.getExpectiMinimaxAction(gameState,0,0)
+        (score,action) = self.getExpectimaxAction(gameState,0,0)
         return action 
 		
         "*** YOUR CODE HERE ***"
