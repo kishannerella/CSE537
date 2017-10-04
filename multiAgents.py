@@ -184,7 +184,20 @@ class MinimaxAgent(MultiAgentSearchAgent):
       Your minimax agent (question 2)
     """
     
-    def getMinimaxAction(self,gameState,turn,depth):       
+    def getMinimaxAction(self,gameState,turn,depth):     
+
+        """ 
+           This fucntion implements the minimax algorithms
+           turn = 0 :  Packman
+           turn > 0 :  ghost
+           This function generates the successorState for an agent and finds
+           the minimum value (for ghost) and maximum value(for packman) 		   
+        """		
+        """
+        If the maximum depth is reached returns the evaluation function 
+        for the state		
+        """ 
+	
         if (depth == self.depth):
             return (self.evaluationFunction(gameState),None)		
         Actions = gameState.getLegalActions(turn)
@@ -200,7 +213,10 @@ class MinimaxAgent(MultiAgentSearchAgent):
           		
         if ( turn == (gameState.getNumAgents()-1) ):		
             currdepth = depth + 1		
-
+        """
+		If there are no more actions from a given state return the 
+        evaluationfunction for the present state		
+        """
         if(len(Actions) == 0):
             return (self.evaluationFunction(gameState),"None")  		
          		 
@@ -245,6 +261,20 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
       Your minimax agent with alpha-beta pruning (question 3)
     """
     def getalphaBetaAction(self,gameState,turn,depth,alpha,beta):
+	
+        """ 
+           This fucntion implements the alpha beta pruning 
+           turn = 0 :  Packman
+           turn > 0 :  ghost
+           This function generates the successorState for an agent and finds
+           the minimum value (for ghost) and maximum value(for packman)
+            stops expanding further nodes once beta > alpha 		   
+        """		
+        """
+        If the maximum depth is reached returns the evaluation function 
+        for the state		
+        """ 	
+	
         if (depth == self.depth):
             return (self.evaluationFunction(gameState),None)		
         Actions = gameState.getLegalActions(turn)
@@ -299,7 +329,22 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
       Your expectimax agent (question 4)
     """
 
-    def getExpectiMinimaxAction(self,gameState,turn,depth):       
+    def getExpectiMinimaxAction(self,gameState,turn,depth):     
+
+        """ 
+           This fucntion implements the Expectiminimax
+           turn = 0 :  Packman
+           turn > 0 :  ghost
+           This function generates the successorState for an agent and finds
+           the maximum value(for packman) and average of all successorStates 
+		   for gosts
+            		   
+        """		
+        """
+        If the maximum depth is reached returns the evaluation function 
+        for the state		
+        """
+	
         if (depth == self.depth):
             return (self.evaluationFunction(gameState),None)		
         Actions = gameState.getLegalActions(turn)
