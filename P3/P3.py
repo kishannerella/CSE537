@@ -53,17 +53,17 @@ def print_ans(assignments):
     for key in keys:
         if(assignments[key]==1):
             ans.append(key)
-    print ans			
-    print "\n"			
+    #print ans			
+    #print "\n"			
 				
 				
 def BTUtil(L,M,assignments,start,dist):
     counter = M
   
     if counter == 0 or start > L:
-        if isSafefinal(assignments) and counter==0:
+        if counter==0:
             print_ans(assignments)
-            print constraintChecks    			 
+            #print constraintChecks    			 
             return True
         return False		 
     for i in range(start,L+1):
@@ -82,16 +82,37 @@ def BTUtil(L,M,assignments,start,dist):
         			
 
 def BT(L, M):
-    "*** YOUR CODE HERE ***"
     global constraintChecks
-    constraintChecks = 0
-    counter = M
-    assignments = {}
-    dist = []	
-    return BTUtil(L,M,assignments,0,dist)
-	
-#    print  constraintChecks	
-    return -1
+    finalkeys = []
+
+    best = -1
+    curr = L
+
+    """
+    First check if there is a solution for L. If there is a solution, take
+    the max length(L') in the solution and iteratively start the whole process
+    with length L'-1. If there is no solution, the last obtained solution is
+    the best.
+    """
+    while True:
+        assignments = {}
+        dist = []
+        constraintChecks = 0
+
+        if BTUtil(curr, M, assignments, 0, dist):
+            finalAssignments = assignments.copy()
+            finalkeys = [key for key,val in finalAssignments.items() if val==1]
+            best = max(finalkeys)
+            curr = best -1
+        else:
+            break;
+
+    if len(finalkeys) > 0:
+        print finalkeys
+        return finalkeys
+    else:
+        print "No solution exists"
+        return -1
 
 
 def FCassigmnets(assignments,counter,marker,dist):
@@ -144,9 +165,9 @@ def FCUtil(L,M,assignments,start,dist):
     global constraintChecks
     if counter == 0 or start > L:
         #print assignments	
-        if isSafefinal(assignments) and counter==0:
+        if counter==0:
             print_ans(assignments) 
-            print constraintChecks  			 
+            #print constraintChecks  			 
             return True
         return False
 
@@ -163,24 +184,48 @@ def FCUtil(L,M,assignments,start,dist):
                 counter = counter + 1 
                 #assignments[i] = 0
             else:
-                return True			
+                for (key, value) in ass1.iteritems():
+                    assignments[key] = value
+                return True				
     return False	
 	
 #Your backtracking+Forward checking function implementation
 def FC(L, M):
-    "*** YOUR CODE HERE ***"
-	
-    counter = M
-    assignments = {}
-    remaining =  range(0,L+1)
-    dist = []	
-    for item in remaining:
-         assignments[item] = 0	
-    #print remaining
     global constraintChecks	
-    constraintChecks = 0    	
-    return FCUtil(L,M,assignments,0,dist)   	
-    return -1
+    finalkeys = []
+
+    """
+    First check if there is a solution for L. If there is a solution, take
+    the max length(L') in the solution and iteratively start the whole process
+    with length L'-1. If there is no solution, the last obtained solution is
+    the best.
+    """
+    best = -1
+    curr = L
+
+    while True:
+        assignments = {}
+        dist = []
+        constraintChecks = 0
+
+        remaining = range(0, curr+1)
+        for item in remaining:
+            assignments[item] = 0
+
+        if FCUtil(curr, M, assignments, 0, dist):
+            finalAssignments = assignments.copy()
+            finalkeys = [key for key,val in finalAssignments.items() if val==1]
+            best = max(finalkeys)
+            curr = best - 1
+        else:
+            break;
+
+    if len(finalkeys) > 0:
+        print finalkeys
+        return finalkeys
+    else:
+        print "No solution exists"
+        return -1
 
 #Bonus: backtracking + constraint propagation
 def CP(L, M):
@@ -188,8 +233,31 @@ def CP(L, M):
     return -1
 
 	
+#BT(8,4)
+#BT(120,7)
 print time.time()
-BT(7,4)
+BT(120, 7)
+print time.time()
+BT(150, 8)
+print time.time()
+FC(150, 9)
+print time.time()
+BT(0, 1)
+BT(1, 2)
+FC(0, 1)
+FC(1, 2)
+"""
+BT(10, 5)
+BT(11, 5)
+BT(12, 5)
+BT(13, 5)
+BT(14, 5)
+BT(15, 5)
+BT(153, 5)
+"""
+"""	
+print time.time()
+BT(8,4)
 BT(17,6)
 BT(25,7)
 BT(55,10)
@@ -199,3 +267,4 @@ FC(17,6)
 FC(25,7)
 FC(55,10)
 print time.time() 
+"""
