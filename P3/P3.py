@@ -8,11 +8,16 @@
 import time
 from copy import copy
 
+
+constraintChecks = 0 
+
 def isSafe(assignments,marker,dist):
 
     if marker in assignments.keys():
         if assignments[marker] == 1:	 
-            return False      
+            return False
+    global constraintChecks
+    constraintChecks = constraintChecks + 1			
     keys = assignments.keys()
     newdist = []
     
@@ -57,8 +62,9 @@ def BTUtil(L,M,assignments,start,dist):
   
     if counter == 0 or start > L:
         if isSafefinal(assignments) and counter==0:
-             print_ans(assignments) 		
-             return True
+            print_ans(assignments)
+            print constraintChecks    			 
+            return True
         return False		 
     for i in range(start,L+1):
         newdist = copy(dist)	
@@ -77,18 +83,22 @@ def BTUtil(L,M,assignments,start,dist):
 
 def BT(L, M):
     "*** YOUR CODE HERE ***"
-	
+    global constraintChecks
+    constraintChecks = 0
     counter = M
     assignments = {}
     dist = []	
     return BTUtil(L,M,assignments,0,dist)
+	
+#    print  constraintChecks	
     return -1
 
 
 def FCassigmnets(assignments,counter,marker,dist):
     if assignments[marker] == 2:
         return False;
-    
+    global constraintChecks		
+    constraintChecks = constraintChecks + 1    
     if marker in assignments.keys():
         if assignments[marker] == 1:	 
             return False
@@ -131,12 +141,13 @@ def FCassigmnets(assignments,counter,marker,dist):
 	
 def FCUtil(L,M,assignments,start,dist):
     counter = M
-  
+    global constraintChecks
     if counter == 0 or start > L:
         #print assignments	
         if isSafefinal(assignments) and counter==0:
-             print_ans(assignments) 		
-             return True
+            print_ans(assignments) 
+            print constraintChecks  			 
+            return True
         return False
 
 	
@@ -166,7 +177,9 @@ def FC(L, M):
     for item in remaining:
          assignments[item] = 0	
     #print remaining
-    return FCUtil(L,M,assignments,0,dist)     	
+    global constraintChecks	
+    constraintChecks = 0    	
+    return FCUtil(L,M,assignments,0,dist)   	
     return -1
 
 #Bonus: backtracking + constraint propagation
