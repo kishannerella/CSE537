@@ -1,0 +1,49 @@
+
+
+Golomb Ruler:
+
+
+Variables: M1, M2,M3, M4,M5 .... (Markers to be placed)
+
+Domain:  set of ruler positions {0,1,2,3...,L} for each Variable
+
+
+(L,M) -- (17,6)
+
+Optimal positions: [0, 1, 4, 10, 12, 17]
+
+CSP      Nodes Explored    
+
+BT           6436
+
+BT+FC        2712
+
+BT+CP        1895
+
+
+(L,M) -- (27,6)
+
+Optimal positions: [0, 1, 4, 10, 12, 17]
+
+CSP      Nodes Explored    
+
+BT           6505
+
+BT+FC        2731
+
+BT+CP        1914
+
+
+(L,M) -- (34,8)
+
+Optimal positions: [0, 1, 4, 9, 15, 22, 32, 34]
+
+CSP      Nodes Explored    
+
+BT           993634
+
+BT+FC        284586
+
+BT+CP        170526
+
+
