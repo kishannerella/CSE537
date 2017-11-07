@@ -235,6 +235,19 @@ class ExactInference(InferenceModule):
         #print len(self.legalPositions)		
         #print "======="      		
         #util.raiseNotDefined()
+		
+        """ 		
+		Here we find the probability of each new position by using the position distribution
+		
+		NP = New Position
+		OP = old Position
+		
+		P(NP) = P(NP/OP1)P(OP1) + P(NP/OP2)P(OP2) + P(NP/OP3)P(OP3) + P(NP/OP4)P(OP4) + ....
+		
+		P(OP1)    = The porbability of ghost at OP1 (self.beliefs)
+		P(NP|OP1) = Probability that ghost moves to NP given it is currently at OP1 (transition probability)
+		             (self.getPositionDistribution gives this value)
+        """ 		
         finalPosDist = util.Counter()
 
         for (pos,prob) in self.beliefs.items():

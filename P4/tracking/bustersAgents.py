@@ -164,10 +164,19 @@ class GreedyBustersAgent(BustersAgent):
             [beliefs for i, beliefs in enumerate(self.ghostBeliefs)
              if livingGhosts[i+1]]
 
+        """			 
+        livingGhostPositionDistributions gives the positional distribution for each ghost.
+		First find the most porbable positon for each ghost. The first fo loop does this and stores the result in 
+        probableGhosts
+
+        Then for each legal action of pacman, it checks the most nearest ghost. Then return an action which 
+        has nearest ghost		
+        """ 		
         probableGhosts = []
         for livingGhostDist in livingGhostPositionDistributions:
             probableGhosts.append(max(livingGhostDist.iteritems(), key=operator.itemgetter(1))[0])
-
+		
+			
         mindist = 999999
         minAction = None		
         for a in legal:
