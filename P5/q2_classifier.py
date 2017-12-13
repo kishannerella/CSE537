@@ -3,7 +3,7 @@ import math
 
 class NaiveBayesSpamClassifier:
     """Naive Bayes Spam Classifier with Laplace smoothing.
-    
+
     When training the classifier, call add_train_data
     for multiple times to feed in labels and data, then
     call finish_training to sum training results up into
@@ -36,9 +36,12 @@ class NaiveBayesSpamClassifier:
         
         def remap(self, str):
             """Retern remapped string of input string.
-                
+            
+            Args:
+                str (str): The string to remap.
+            
             Reterns:
-                remapped_str (str): remapped string.
+                remapped_str (str): Remapped string.
             """
             for regexp in self.all_res:
                 if regexp.match(str):
