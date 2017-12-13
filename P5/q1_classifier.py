@@ -104,8 +104,17 @@ class ID3Builder:
         
         print "max_information_gain - " + str(max_information_gain)
         print "best_attribute - " + str(best_attribute)
-        #   return None if attribute with max gain does not pass chi square test
-        if not self._chi_square(best_attribute, data):
+        
+        #   return None if maximum gain is 0,
+        #   which means the data is pure
+        if np.isclose(max_information_gain, 0.0):
+            return None
+        
+        #   return None if we are certain that labels are distriuted
+        #   equally over values among this attribute.
+        #   i.e. the p-value from chi-square statistics is not small
+        #   enough to reject the null hypothesis
+        if self._chi_square_H0(best_attributes, data):
             return None
             
         return best_attribute
@@ -146,6 +155,7 @@ class ID3Builder:
                 root.Leaf = True
                 root.Label = major_label
                 
+        return root
 
     def _split_data_with_attr(self, attr, data):
         """Split data and remove according attribute"""
@@ -181,17 +191,29 @@ class ID3Builder:
         return ret_dict
         """
     
-    def _chi_square(self, attr, data):
-        return True;
-        """Perform chi-square tests on every attribute"""
-        if len(data) == 1:
-            return True
+    def _chi_square_H0(self, attr, data):
+        """Test the null hypothesis on attribute with chi-square tests.
+           
+        Returns:
+            null_hypo(bool): True if null hypothesis is true, False otherwise.
+        """
+        if np.isclose(self.confidence_level, 1.0):
+            return False
         
-        #   TODO: fill in the implementation with scipy
+        #   TODO: fill in the implementation with scipy.
+        #       According to scipy's documentation,
+        #       values in f_exp are better off being larger than 5.
+        #       Do some scaling if encounters any error.
         feature_vals, label = data[0]
         attr_cnt = len(feature_vals)
         for i in range(attr_cnt):
-            pass
+            
+            
+        #   p_val means how likely the distribution is observed
+        #   from the expected frequency, the null hypothesis.
+        #   If it is not smaller than the confidence level, we assume
+        #   the null hypothesis is true.
+        return p_val >= self.confidence_level
 
 
 class ID3Classifier:
@@ -206,7 +228,7 @@ class ID3Classifier:
     def add_attr_name(self, name):
         
         self.attributes_name_book[ self.attributes_count ] = name
-        self.attributes_values[ self.attributes_count ] = [1, 2, 3, 4, 5]
+        self.attributes_values[ self.attributes_count ] = [0, 1, 2, 3, 4]
         self.attributes_count += 1
     
     def add_data(self, label, feature_vals):
