@@ -47,28 +47,38 @@ class ID3Builder:
         
         self.attributes_values = attr_vals
         self.confidence_level = p_val
-
         #return root
         
     def _get_best_attr(self, data, split_features):
-        print data
+        #print data
         """Find best attribute to split on"""
         best_attribute = -1
         max_information_gain = float("-inf")
+        best_feature_info = []
         
         feature_max_val = 5
         features, label = data[0]
         sample_count = len(data)
         
+        
+        """
+        If there is only one/no feature left to split, return None
+        Returning None should take care of assigning the major label
+        as leaf
+        """
+        if (len(split_features) >= len(features)-1):
+            return None
+        
         total_pos = 0
         total_neg = 0
-        
         for f, l in data:
             if (l == 1):
                 total_pos += 1
             else:
                 total_neg += 1
-        
+        """
+        If all the data has already been classified to the same value
+        """
         if total_pos == 0 or total_neg == 0 :
             return None
         
@@ -79,17 +89,17 @@ class ID3Builder:
                 continue
             #   TODO: compute information gain for this attribute
             feature_tcount = []
-            for j in range(0, feature_max_val+1):
+            for j in range(0, feature_max_val):
                 feature_tcount.append([0,0])
 
             for f, l in data:
                 #print "f - " + str(f) + " f(i) - " + str(f[i]) + " l - " + str(l)
-                feature_tcount[f[i]][l] += 1
+                feature_tcount[f[i]-1][l] += 1
             
             future_inf = 0.0
             #print "feature_count " + str(feature_tcount)
             
-            for j in range(1, feature_max_val+1):
+            for j in range(0, feature_max_val):
                 #print "feature_count[j] " + str(feature_tcount[j])
                 if (feature_tcount[j][0] + feature_tcount[j][1] > 0):
                     future_inf += ((feature_tcount[j][0] + feature_tcount[j][1])/(sample_count*1.0)) \
@@ -101,11 +111,14 @@ class ID3Builder:
             if max_information_gain < information_gain:
                 max_information_gain = information_gain
                 best_attribute = i
+                best_feature_info = deepcopy(feature_tcount)
         
+        if np.isclose(max_information_gain, 0.0):
+            return None
         print "max_information_gain - " + str(max_information_gain)
         print "best_attribute - " + str(best_attribute)
         #   return None if attribute with max gain does not pass chi square test
-        if not self._chi_square(best_attribute, data):
+        if not self._chi_square(best_attribute, data, best_feature_info, total_pos, total_neg):
             return None
             
         return best_attribute
@@ -119,11 +132,15 @@ class ID3Builder:
                 split_features.add(best_attr_id)            
                 #attr_vals = self.attributes_values[ best_attr_id ]
                 split_data = self._split_data_with_attr(best_attr_id, data)
-                print split_data
+                root.attr_id = best_attr_id
+                #print split_data
                 for i in range(5):
                     c_data = split_data[i]
+                    #TODO : Change this to make some sense
                     if (len(c_data) == 0):
-                        root.nodes[i] = -1
+                        root.nodes[i] = ID3Node()
+                        root.nodes[i].Leaf = True
+                        root.nodes[i].Label = 1
                     else:
                         root.nodes[i] = ID3Node()
                         self.build_tree_rec(root.nodes[i], c_data, deepcopy(split_features))
@@ -132,8 +149,8 @@ class ID3Builder:
                 #   TODO: find the majority label and put it to root
                 pcount = 0
                 ncount = 0
-                for d in data:
-                    if d[1] == 1:
+                for f,l in data:
+                    if l == 1:
                         pcount+=1
                     else:
                         ncount+=1
@@ -158,40 +175,39 @@ class ID3Builder:
             split_data[f[attr]-1].append(d)
             
         return split_data
-        """
-        feature_vals, label = data[0]
-        attr_is_first = attr == 0
-        attr_is_last = attr == (len(feature_vals) - 1)
-        
-        ret_dict = {}
-        idx = 0
-        #   vals are sorted
-        for val in vals:
-            ret_dict[val] = []
-        
-        for feature_vals, label in data:
-            val = feature_vals[attr]
-            new_feature_vals = []
-            if not attr_is_first:
-                new_feature_vals.append(feature_vals[:attr-1])
-            if not attr_is_last:
-                new_feature_vals.append(feature_vals[attr+1:])
-            ret_dict[val].append( (new_feature_vals, label) )
-            
-        return ret_dict
-        """
     
-    def _chi_square(self, attr, data):
-        return True;
+    def _chi_square(self, attr, data, feature_info, total_pos, total_neg):
+
         """Perform chi-square tests on every attribute"""
         if len(data) == 1:
+            return False
+        
+        if np.isclose(self.confidence_level, 1.0):
             return True
         
-        #   TODO: fill in the implementation with scipy
-        feature_vals, label = data[0]
-        attr_cnt = len(feature_vals)
-        for i in range(attr_cnt):
-            pass
+        p_ratio = (total_pos*1.0)/(total_pos+total_neg)
+        n_ratio = (total_neg*1.0)/(total_pos+total_neg)
+        
+        f_obs = []
+        
+        for i in range(5):
+            f_obs.append(feature_info[i][1])
+            
+        for i in range(5):
+            f_obs.append(feature_info[i][0])
+        
+        f_exp = []
+        for i in range(5):
+            f_exp.append(p_ratio*(feature_info[i][1]+feature_info[i][0]))
+        
+        for i in range(5):
+            f_exp.append(n_ratio*(feature_info[i][1]+feature_info[i][0]))
+                
+        chisq, p_val = sp.stats.chisquare(f_obs, f_exp, 5-1)
+        print f_obs
+        print f_exp
+        print chisq, p_val
+        return p_val < self.confidence_level
 
 
 class ID3Classifier:
@@ -217,19 +233,26 @@ class ID3Classifier:
         self.data.append( (feature_vals, label) )
     
     def build_tree(self, confidence_level):
-        print self.data
+        #print self.data
         #exit()
         self.tree = ID3Node()
         self.builder = ID3Builder(confidence_level, self.attributes_values)
-        self.tree = self.builder.build_tree_rec(self.tree, self.data, set([]))
+        self.builder.build_tree_rec(self.tree, self.data, set([]))
         
     def test_data(self, feature_vals):
         """traverse the tree on root"""
         #   TODO: implement this function
+        root = self.tree
+        #print root
+        while True:
+            if root.Leaf:
+                return root.Label
+            else:
+                root = root.nodes[feature_vals[root.attr_id]-1]
         
     def save_tree(self, filename):
         obj = open(filename,'w')
-        pkl.dump(self,obj)
+        pkl.dump(self.tree,obj)
         """save tree to file with pickle library"""
         #   TODO: implement this function,
         #       cast th tree to TA's format if needed
@@ -262,7 +285,7 @@ if __name__ == "__main__":
 	        label_file += "." + tsplit[i]
         label_file += "_label"
         label_file += "." + tsplit[len(tsplit)-1]
-        print label_file
+        #print label_file
     else:
         exit()
     if "-f2" in args:
@@ -291,8 +314,22 @@ if __name__ == "__main__":
     
     id3_classifier.build_tree(p_val)	
     id3_classifier.save_tree(decision_tree)
-    with open(test_file) as test_in, open(output_file, "w+") as test_out:
-        for line in test_in:
-            pass
+    
+    #TODO remove test_label
+    with open(test_file) as test_in, open(output_file, "w+") as test_out, open("test_label.csv") as test_label_in:
+        total_tests = 0
+        correct_tests = 0
+        for test_line, test_label_line in izip(test_in, test_label_in):
+            tokens = [int(i) for i in test_line.split()]
+            correct_label = int(test_label_line)
+            decision_label = id3_classifier.test_data(tokens)
+            
+            total_tests += 1
+            if correct_label == decision_label:
+                correct_tests +=1
+            test_out.write("{0}\n".format(decision_label))
+        print correct_tests
+        print("accuracy: {0}%".format(correct_tests * 1.0 / total_tests * 100))
+            
             
     
