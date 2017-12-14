@@ -25,6 +25,16 @@ from copy import deepcopy
 #       pk = [count of positive label, count of negative label]
 #   Returns: entropy value
 #   
+class TreeNode():
+    def __init__(self, data='T',children=[-1]*5):
+        self.nodes = list(children)
+        self.data = data
+
+
+    def save_tree(self,filename):
+        obj = open(filename,'w')
+        pkl.dump(self,obj)
+        
 class ID3Node:
     
     def __init__(self):
@@ -84,10 +94,23 @@ class ID3Builder:
         
         cur_inf = sp.stats.entropy([total_pos, total_neg])
         
+        f,l = data[0]
+        feat_count = []
+        for i in range(len(f)):
+            per_feat = []
+            for j in range(0, feature_max_val):
+                per_feat.append([0,0])
+            feat_count.append(per_feat)
+                
+        for f,l in data:
+            for i in range(len(f)):
+                feat_count[i][f[i]-1][l] += 1
+        
         for i in range(len(features)):
             if (i in split_features):
                 continue
             #   TODO: compute information gain for this attribute
+            """
             feature_tcount = []
             for j in range(0, feature_max_val):
                 feature_tcount.append([0,0])
@@ -95,19 +118,16 @@ class ID3Builder:
             for f, l in data:
                 #print "f - " + str(f) + " f(i) - " + str(f[i]) + " l - " + str(l)
                 feature_tcount[f[i]-1][l] += 1
-            
+            """
+            feature_tcount = feat_count[i]
             future_inf = 0.0
-            #print "feature_count " + str(feature_tcount)
             
             for j in range(0, feature_max_val):
-                #print "feature_count[j] " + str(feature_tcount[j])
                 if (feature_tcount[j][0] + feature_tcount[j][1] > 0):
                     future_inf += ((feature_tcount[j][0] + feature_tcount[j][1])/(sample_count*1.0)) \
                                      * sp.stats.entropy([feature_tcount[j][1], feature_tcount[j][0]])
             information_gain = cur_inf - future_inf
-            #print "i1  " +  str(((feature_tcount[j][0] + feature_tcount[j][1])/(sample_count*1.0)))
-            #print "i2  " +  str(sp.stats.entropy([feature_tcount[j][1], feature_tcount[j][0]]))
-            #print "information gain  - " + str(information_gain)
+
             if max_information_gain < information_gain:
                 max_information_gain = information_gain
                 best_attribute = i
@@ -115,8 +135,8 @@ class ID3Builder:
         
         if np.isclose(max_information_gain, 0.0):
             return None
-        print "max_information_gain - " + str(max_information_gain)
-        print "best_attribute - " + str(best_attribute)
+        #print "max_information_gain - " + str(max_information_gain)
+        #print "best_attribute - " + str(best_attribute)
         #   return None if attribute with max gain does not pass chi square test
         if not self._chi_square(best_attribute, data, best_feature_info, total_pos, total_neg):
             return None
