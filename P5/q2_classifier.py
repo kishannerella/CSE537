@@ -3,13 +3,51 @@ import math
 
 class NaiveBayesSpamClassifier:
     """Naive Bayes Spam Classifier with Laplace smoothing.
-    
+
     When training the classifier, call add_train_data
     for multiple times to feed in labels and data, then
     call finish_training to sum training results up into
     a dictionary of Bayesian estimates for each word.
     
     """
+    class SpecialRules:
+        """A class for remapping words to string with regular expressions.
+        
+        The matching of rule is done sequentially w.r.t.
+        the order in which the rules are added to the class.
+            
+        ***This does not do better than smoothing***
+        
+        """
+        def __init__(self):
+            self.all_res = []
+            self.map_to = {}
+            
+        def add_rule(self, reg, str):
+            """Add rule to this handler.
+            
+            Args:
+                reg (str): The rule in regular expression.
+                str (str): The string to which matched input should be remapped.
+            """
+            new_re = re.compile(reg)
+            self.all_res.append(new_re)
+            self.map_to[new_re] = str
+        
+        def remap(self, str):
+            """Retern remapped string of input string.
+            
+            Args:
+                str (str): The string to remap.
+            
+            Reterns:
+                remapped_str (str): Remapped string.
+            """
+            for regexp in self.all_res:
+                if regexp.match(str):
+                    return self.map_to[regexp]
+            return str
+            
     def __init__(self):
         """Inits NaiveBayesSpamClassifier, no parameter is needed."""
         self.all_words = {}
@@ -22,6 +60,10 @@ class NaiveBayesSpamClassifier:
         
         self.default_logp_ham = 0.0
         self.default_logp_spam = 0.0
+        
+        # self.rule_handler.add_rule("^[0-9]{,3}$", "000")
+        # self.rule_handler.add_rule("^(0[0-9]|1[0-9]|2[0-3])[0-5][0-9]$", "0000")
+        # self.rule_handler.add_rule("^[0-9,]{4,}$", "00000")
         
     def add_train_data(self, is_spam, tokens):
         """Counts the appearance of each word in spam and ham.
@@ -76,7 +118,7 @@ class NaiveBayesSpamClassifier:
         Args:
             smoothing (int): The value of Laplace smoothing parameter.
         """
-        s = smoothing
+        s = smoothing * 1.0
         all_ham = self.ham_cnt
         all_spam = self.spam_cnt
         vocab_cnt = len(self.all_words)

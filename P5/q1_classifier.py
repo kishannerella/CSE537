@@ -124,6 +124,15 @@ class ID3Builder:
         return best_attribute
         
     def build_tree_rec(self, root, data, split_features):
+        """Build ID3 tree on root to classify data.
+        
+        Args:
+            root (ID3Node): the root to build on.
+            data (List): Training dataset,
+                a list of tuples ( feature_values, label ).
+        Returns:
+            root (ID3Node): the root of built tree.
+        """
         
         #if not self._stop():
         if (len(data) > 0):
@@ -163,6 +172,7 @@ class ID3Builder:
                 root.Leaf = True
                 root.Label = major_label
                 
+        return root
 
     def _split_data_with_attr(self, attr, data):
         """Split data and remove according attribute"""
@@ -222,7 +232,7 @@ class ID3Classifier:
     def add_attr_name(self, name):
         
         self.attributes_name_book[ self.attributes_count ] = name
-        self.attributes_values[ self.attributes_count ] = [1, 2, 3, 4, 5]
+        self.attributes_values[ self.attributes_count ] = [0, 1, 2, 3, 4]
         self.attributes_count += 1
     
     def add_data(self, label, feature_vals):
@@ -240,7 +250,14 @@ class ID3Classifier:
         self.builder.build_tree_rec(self.tree, self.data, set([]))
         
     def test_data(self, feature_vals):
-        """traverse the tree on root"""
+        """Traverse the tree on root.
+        
+        Args:
+            feature_vals(List): the list of feature values in integer.
+        
+        Returns:
+            label(str): the label to which this set of features are classified.
+        """
         #   TODO: implement this function
         root = self.tree
         #print root
